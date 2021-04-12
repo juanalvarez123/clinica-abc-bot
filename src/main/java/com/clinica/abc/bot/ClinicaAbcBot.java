@@ -1,15 +1,18 @@
 package com.clinica.abc.bot;
 
 import com.clinica.abc.services.ClinicaAbcBotService;
+import java.util.Optional;
+import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.session.TelegramLongPollingSessionBot;
 
 @Component
-public class ClinicaAbcBot extends TelegramLongPollingBot {
+public class ClinicaAbcBot extends TelegramLongPollingSessionBot {
 
   private final ClinicaAbcBotService clinicaAbcBotService;
 
@@ -24,14 +27,14 @@ public class ClinicaAbcBot extends TelegramLongPollingBot {
    * Esta función se invocará cuando nuestro bot reciba un mensaje
    */
   @Override
-  public void onUpdateReceived(final Update update) {
+  public void onUpdateReceived(final Update update, final Optional<Session> optionalSession) {
     // Se obtiene el mensaje escrito por el usuario
     final String messageTextReceived = update.getMessage().getText();
 
     // Se obtiene el id de chat del usuario
     final long chatId = update.getMessage().getChatId();
 
-    String response = clinicaAbcBotService.processMessage(messageTextReceived);
+    String response = clinicaAbcBotService.processMessage(messageTextReceived, optionalSession);
 
     // Se crea un objeto mensaje
     SendMessage message = SendMessage
