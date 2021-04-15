@@ -13,8 +13,12 @@ repositories {
 }
 
 dependencies {
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${openfeign}"
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
 

@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -14,12 +13,13 @@ import org.telegram.telegrambots.session.TelegramLongPollingSessionBot;
 @Component
 public class ClinicaAbcBot extends TelegramLongPollingSessionBot {
 
+  private final String botToken;
+
   private final ClinicaAbcBotService clinicaAbcBotService;
 
-  @Value("${bot.token}")
-  private String botToken;
-
-  public ClinicaAbcBot(ClinicaAbcBotService clinicaAbcBotService) {
+  public ClinicaAbcBot(@Value("${bot.token}") String botToken,
+      ClinicaAbcBotService clinicaAbcBotService) {
+    this.botToken = botToken;
     this.clinicaAbcBotService = clinicaAbcBotService;
   }
 
