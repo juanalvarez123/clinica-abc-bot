@@ -1,6 +1,8 @@
 package com.clinica.abc.services;
 
 import com.clinica.abc.common.NextStep;
+import com.clinica.abc.consumers.users.UserConsumer;
+import com.clinica.abc.model.UserDTO;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.apache.commons.lang3.EnumUtils;
@@ -12,10 +14,16 @@ public class ClinicaAbcBotService {
 
   private static final String NEXT_STEP = "NEXT_STEP";
 
+  private static final String CURRENT_USER = "CURRENT_USER";
+
   private final ScheduleService scheduleService;
 
-  public ClinicaAbcBotService(ScheduleService scheduleService) {
+  private final UserConsumer userConsumer;
+
+  public ClinicaAbcBotService(ScheduleService scheduleService,
+      UserConsumer userConsumer) {
     this.scheduleService = scheduleService;
+    this.userConsumer = userConsumer;
   }
 
   public String processMessage(String message, Optional<Session> optionalSession) {
@@ -39,11 +47,31 @@ public class ClinicaAbcBotService {
 
     switch (nextStep) {
       case WELCOME:
+        session.setAttribute(NEXT_STEP, NextStep.FIND_USER);
+        return "Bienvenido a la Clínica ABC, por favor digita tu número de identificación";
+
+      case FIND_USER:
+        Optional<UserDTO> optionalUser = userConsumer.getUser(message);
+        if (optionalUser.isPresent()) {
+          session.setAttribute(NEXT_STEP, NextStep.USER_FOUND);
+          session.setAttribute(CURRENT_USER, optionalUser.get());
+          return processMessage(message, NextStep.USER_FOUND, session);
+        } else {
+          session.setAttribute(NEXT_STEP, NextStep.USER_NOT_FOUND);
+          return processMessage(message, NextStep.USER_NOT_FOUND, session);
+        }
+
+      case USER_FOUND:
         session.setAttribute(NEXT_STEP, NextStep.DECISION);
-        return "Bienvenido a la Clínica ABC, que te gustaría hacer? ... "
+        UserDTO user = (UserDTO) session.getAttribute(CURRENT_USER);
+        return "Hola " + user.getFullName() + ", que te gustaría hacer? ... "
             + "Opción 1 para ver el calendario de disponibilidad ... "
             + "Opción 2 para realizar un agendamiento ... "
             + "Opción 3 para salir";
+
+      case USER_NOT_FOUND:
+        session.stop();
+        return "Lo sentimos, no pudimos encontrarte. Por favor llamanos al 01-8000 123-456. Siempre es un placer servirte";
 
       case DECISION:
         session.setAttribute(NEXT_STEP, NextStep.FAREWELL);
@@ -59,7 +87,7 @@ public class ClinicaAbcBotService {
 
       case FAREWELL:
         session.stop();
-        return "Fue un placer servirte";
+        return "Siempre es un placer servirte";
 
       default:
         session.setAttribute(NEXT_STEP, NextStep.DECISION);

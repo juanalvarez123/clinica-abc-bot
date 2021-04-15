@@ -10,7 +10,7 @@ public class ScheduleService {
     Random random = new Random();
     int value = random.nextInt(10);
 
-    return value % 2 == 0 ? "Hay disponibiliad para todo el més de Abril"
+    return value % 2 == 0 ? "Hay disponibiliad para todo el mes de Abril"
         : "Lo sentimos, no hay disponibilidad de citas para este mes";
   }
 

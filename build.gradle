@@ -21,6 +21,7 @@ dependencies {
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign:${openfeign}"
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+    implementation group: 'log4j', name: 'log4j', version: "${log4jVersion}"
 
     implementation 'org.telegram:telegrambots-spring-boot-starter:5.1.1'
     implementation 'org.telegram:telegrambots-chat-session-bot:5.1.1'
