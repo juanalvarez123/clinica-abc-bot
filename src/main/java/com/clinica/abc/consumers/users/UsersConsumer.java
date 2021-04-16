@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class UserConsumer {
+public class UsersConsumer {
 
   private final UsersFeignConfiguration usersFeignConfiguration;
 
-  public UserConsumer(UsersFeignConfiguration usersFeignConfiguration) {
+  public UsersConsumer(UsersFeignConfiguration usersFeignConfiguration) {
     this.usersFeignConfiguration = usersFeignConfiguration;
   }
 

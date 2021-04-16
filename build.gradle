@@ -2,11 +2,11 @@ plugins {
     id 'org.springframework.boot' version '2.3.3.RELEASE'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    id 'com.apollographql.apollo' version '2.5.5'
 }
 
 group = 'com.clinica.abc'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '8'
 
 repositories {
     mavenCentral()
@@ -25,6 +25,8 @@ dependencies {
 
     implementation 'org.telegram:telegrambots-spring-boot-starter:5.1.1'
     implementation 'org.telegram:telegrambots-chat-session-bot:5.1.1'
+
+    implementation 'com.apollographql.apollo:apollo-runtime:2.5.5'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

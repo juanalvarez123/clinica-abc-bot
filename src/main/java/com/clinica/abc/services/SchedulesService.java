@@ -1,17 +1,43 @@
 package com.clinica.abc.services;
 
-import java.util.Random;
+import com.clinica.abc.LaunchListQuery.Launch;
+import com.clinica.abc.common.SessionValue;
+import com.clinica.abc.consumers.schedules.SchedulesConsumer;
+import java.util.List;
+import java.util.Optional;
+import org.apache.shiro.session.Session;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ScheduleService {
+public class SchedulesService {
 
-  public String getSchedule() {
-    Random random = new Random();
-    int value = random.nextInt(10);
+  private final SchedulesConsumer schedulesConsumer;
 
-    return value % 2 == 0 ? "Hay disponibiliad para todo el mes de Abril"
-        : "Lo sentimos, no hay disponibilidad de citas para este mes";
+  public SchedulesService(SchedulesConsumer schedulesConsumer) {
+    this.schedulesConsumer = schedulesConsumer;
+  }
+
+  public String getSchedules(Session session) {
+    this.schedulesConsumer.getSchedules(session);
+
+    boolean schedulesDatesFinished = (boolean) session.getAttribute(SessionValue.SCHEDULES_DATES_FINISHED);
+
+    while (!schedulesDatesFinished) {
+      schedulesDatesFinished = (boolean) session.getAttribute(SessionValue.SCHEDULES_DATES_FINISHED);
+    }
+
+    Optional<List<Launch>> optionalLaunches = (Optional<List<Launch>>) session.getAttribute(SessionValue.SCHEDULES_DATES);
+
+    if (!optionalLaunches.isPresent()) {
+      return "Lo sentimos, no hay fechas disponibles";
+    }
+
+    String availableDates = optionalLaunches.get().stream()
+        .map(date -> date.site())
+        .reduce((date1, date2) -> date1 + ", " + date2)
+        .get();
+
+    return "Las fechas disponibles son: " + availableDates + ". Por favor elige una";
   }
 
   public String setAppointment(String date) {

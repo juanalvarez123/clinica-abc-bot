@@ -1,7 +1,7 @@
 package com.clinica.abc.services;
 
 import com.clinica.abc.common.NextStep;
-import com.clinica.abc.consumers.users.UserConsumer;
+import com.clinica.abc.consumers.users.UsersConsumer;
 import com.clinica.abc.model.UserDTO;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -16,14 +16,14 @@ public class ClinicaAbcBotService {
 
   private static final String CURRENT_USER = "CURRENT_USER";
 
-  private final ScheduleService scheduleService;
+  private final SchedulesService schedulesService;
 
-  private final UserConsumer userConsumer;
+  private final UsersConsumer usersConsumer;
 
-  public ClinicaAbcBotService(ScheduleService scheduleService,
-      UserConsumer userConsumer) {
-    this.scheduleService = scheduleService;
-    this.userConsumer = userConsumer;
+  public ClinicaAbcBotService(SchedulesService schedulesService,
+      UsersConsumer usersConsumer) {
+    this.schedulesService = schedulesService;
+    this.usersConsumer = usersConsumer;
   }
 
   public String processMessage(String message, Optional<Session> optionalSession) {
@@ -51,7 +51,7 @@ public class ClinicaAbcBotService {
         return "Bienvenido a la Clínica ABC, por favor digita tu número de identificación";
 
       case FIND_USER:
-        Optional<UserDTO> optionalUser = userConsumer.getUser(message);
+        Optional<UserDTO> optionalUser = usersConsumer.getUser(message);
         if (optionalUser.isPresent()) {
           session.setAttribute(NEXT_STEP, NextStep.USER_FOUND);
           session.setAttribute(CURRENT_USER, optionalUser.get());
@@ -76,9 +76,9 @@ public class ClinicaAbcBotService {
       case DECISION:
         session.setAttribute(NEXT_STEP, NextStep.FAREWELL);
         if (message.equals("1")) {
-          return scheduleService.getSchedule();
+          return schedulesService.getSchedules(session);
         } else if (message.equals("2")) {
-          return scheduleService.setAppointment(LocalDate.now().toString());
+          return schedulesService.setAppointment(LocalDate.now().toString());
         } else if (message.equals("3")) {
           return processMessage(message, NextStep.FAREWELL, session);
         } else {
@@ -91,7 +91,7 @@ public class ClinicaAbcBotService {
 
       default:
         session.setAttribute(NEXT_STEP, NextStep.DECISION);
-        return "Lo siento, no pude entenderte, ¿Me podrías repetir por favor?";
+        return "Lo siento, no pude entenderte, ¿Me puedes repetir por favor?";
     }
   }
 }
