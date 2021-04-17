@@ -1,0 +1,10 @@
+mutation CreateSchedule($date: String!, $hour: String!, $idReservation: String!, $state: String!) {
+    CreateSchedule(input: {
+        date: $date
+        hour: $hour
+        id_reservation: $idReservation
+        state: $state
+    }) {
+        id_reservation
+    }
+}
