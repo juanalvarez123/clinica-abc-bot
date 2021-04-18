@@ -1,5 +1,6 @@
-mutation CreateSchedule($scheduleId: String!, $userId: String!) {
-    UseSchedule(input : { scheduleId: $scheduleId, userId: $userId }) {
+query SchedulingByUser($userId: String!) {
+    schedulesByUser(user_id: $userId) {
+        id
         date
         hour
         id_reservation

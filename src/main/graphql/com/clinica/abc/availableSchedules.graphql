@@ -1,7 +1,11 @@
-query SchedulesList {
-    SchedulingByDateAndHour {
+query AvailableSchedulesList {
+    availableSchedules {
         id
         date
         hour
+        medicalprofessional {
+            name
+            lastName
+        }
     }
 }

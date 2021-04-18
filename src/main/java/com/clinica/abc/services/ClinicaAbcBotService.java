@@ -41,6 +41,8 @@ public class ClinicaAbcBotService {
 
   private String processMessage(String message, NextStep nextStep, Session session) {
 
+    UserDTO user;
+
     switch (nextStep) {
       case WELCOME:
         session.setAttribute(SessionValue.NEXT_STEP, NextStep.FIND_USER);
@@ -59,10 +61,11 @@ public class ClinicaAbcBotService {
 
       case USER_FOUND:
         session.setAttribute(SessionValue.NEXT_STEP, NextStep.DECISION);
-        UserDTO user = (UserDTO) session.getAttribute(SessionValue.CURRENT_USER);
-        return "Hola " + user.getFullName() + ", ¿que te gustaría hacer? ... "
-            + "Opción 1 para realizar un agendamiento ... "
-            + "Opción 2 para salir";
+        user = (UserDTO) session.getAttribute(SessionValue.CURRENT_USER);
+        return "Hola " + user.getFullName() + ", ¿que te gustaría hacer?\n"
+            + "\n1. Realizar un agendamiento"
+            + "\n2. Consultar tus citas."
+            + "\n3. Salir.";
 
       case USER_NOT_FOUND:
         session.stop();
@@ -70,8 +73,11 @@ public class ClinicaAbcBotService {
 
       case DECISION:
         if (message.equals("1")) {
-          return schedulesService.getSchedules(session);
+          return schedulesService.getAvailableSchedules(session);
         } else if (message.equals("2")) {
+          user = (UserDTO) session.getAttribute(SessionValue.CURRENT_USER);
+          return schedulesService.getSchedulesByUser(String.valueOf(user.getNumeroId()), session);
+        } else if (message.equals("3")) {
           session.setAttribute(SessionValue.NEXT_STEP, NextStep.FAREWELL);
           return processMessage(message, NextStep.FAREWELL, session);
         } else {
@@ -79,10 +85,7 @@ public class ClinicaAbcBotService {
         }
 
       case SELECT_DATE:
-        return schedulesService.validateDate(message, session);
-
-      case SELECT_HOUR:
-        return schedulesService.validateHour(message, session);
+        return schedulesService.validateAvailableScheduleOption(message, session);
 
       case CONFIRM_APPOINTMENT:
         if (message.trim().equalsIgnoreCase("si")) {

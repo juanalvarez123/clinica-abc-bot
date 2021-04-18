@@ -9,7 +9,6 @@ public enum NextStep {
 
   DECISION,
   SELECT_DATE,
-  SELECT_HOUR,
   CONFIRM_APPOINTMENT,
 
   FAREWELL,
