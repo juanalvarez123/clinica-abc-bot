@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.session.TelegramLongPollingSessionBot;
+import org.telegram.telegrambots.starter.AfterBotRegistration;
 
 @Component
 public class ClinicaAbcBot extends TelegramLongPollingSessionBot {
@@ -62,4 +64,12 @@ public class ClinicaAbcBot extends TelegramLongPollingSessionBot {
     // Se devuelve el token que nos generó el BotFather de nuestro bot
     return botToken;
   }
+
+  /**
+   * Sirve para "matar" la instancia del bot
+   */
+  /*@AfterBotRegistration
+  public void afterRegistration(BotSession session) {
+    session.stop();
+  }*/
 }
