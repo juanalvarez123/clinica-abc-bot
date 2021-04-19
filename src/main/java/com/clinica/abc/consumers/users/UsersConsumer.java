@@ -38,5 +38,4 @@ public class UsersConsumer {
         .fechaNacimiento(userResponse.getFechaNacimiento())
         .build();
   }
-
 }

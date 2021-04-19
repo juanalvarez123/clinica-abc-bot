@@ -65,6 +65,7 @@ public class SchedulesConsumer {
         .build()).enqueue(new Callback<Data>() {
       @Override
       public void onResponse(@NotNull Response<Data> response) {
+        log.info("Cita registrada para el usuario " + userId);
         session.setAttribute(SessionValue.SET_APPOINTMENT_FINISHED_OK, true);
         session.setAttribute(SessionValue.SET_APPOINTMENT_FINISHED, true);
       }

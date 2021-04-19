@@ -11,11 +11,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserResponse {
 
-    private String idUsuario;
-    private String tipoId;
-    private int numeroId;
-    private String nombres;
-    private String apellidos;
-    private String genero;
-    private String fechaNacimiento;
+  private String idUsuario;
+  private String tipoId;
+  private int numeroId;
+  private String nombres;
+  private String apellidos;
+  private String genero;
+  private String fechaNacimiento;
 }

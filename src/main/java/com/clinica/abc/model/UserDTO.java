@@ -24,5 +24,4 @@ public class UserDTO {
   public String getFullName() {
       return nombres.concat(" ").concat(apellidos);
   }
-
 }
