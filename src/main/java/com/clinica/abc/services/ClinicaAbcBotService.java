@@ -16,10 +16,14 @@ public class ClinicaAbcBotService {
 
   private final UsersConsumer usersConsumer;
 
+  private final UsersService usersService;
+
   public ClinicaAbcBotService(SchedulesService schedulesService,
-      UsersConsumer usersConsumer) {
+      UsersConsumer usersConsumer,
+      UsersService usersService) {
     this.schedulesService = schedulesService;
     this.usersConsumer = usersConsumer;
+    this.usersService = usersService;
   }
 
   public String processMessage(String message, Optional<Session> optionalSession) {
@@ -50,9 +54,12 @@ public class ClinicaAbcBotService {
 
       case FIND_USER:
         Optional<UserDTO> optionalUser = usersConsumer.getUser(message);
+
         if (optionalUser.isPresent()) {
           session.setAttribute(SessionValue.NEXT_STEP, NextStep.USER_FOUND);
           session.setAttribute(SessionValue.CURRENT_USER, optionalUser.get());
+          session.setAttribute(SessionValue.SHOW_INTRO, true);
+
           return processMessage(message, NextStep.USER_FOUND, session);
         } else {
           session.setAttribute(SessionValue.NEXT_STEP, NextStep.USER_NOT_FOUND);
@@ -60,12 +67,7 @@ public class ClinicaAbcBotService {
         }
 
       case USER_FOUND:
-        session.setAttribute(SessionValue.NEXT_STEP, NextStep.DECISION);
-        user = (UserDTO) session.getAttribute(SessionValue.CURRENT_USER);
-        return "Hola " + user.getFullName() + ", ¿que te gustaría hacer?\n"
-            + "\n1. Realizar un agendamiento"
-            + "\n2. Consultar tus citas."
-            + "\n3. Salir.";
+        return usersService.getMenuOptions(session);
 
       case USER_NOT_FOUND:
         session.stop();

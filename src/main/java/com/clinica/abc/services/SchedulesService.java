@@ -16,12 +16,15 @@ public class SchedulesService {
 
   private final SchedulesConsumer schedulesConsumer;
 
-  public SchedulesService(SchedulesConsumer schedulesConsumer) {
+  private final UsersService usersService;
+
+  public SchedulesService(SchedulesConsumer schedulesConsumer,
+      UsersService usersService) {
     this.schedulesConsumer = schedulesConsumer;
+    this.usersService = usersService;
   }
 
   public String getAvailableSchedules(Session session) {
-    session.setAttribute(SessionValue.NEXT_STEP, NextStep.SELECT_DATE);
 
     this.schedulesConsumer.getAvailableSchedules(session);
 
@@ -34,15 +37,22 @@ public class SchedulesService {
     Optional<List<AvailableSchedule>> optionalSchedules = (Optional<List<AvailableSchedule>>) session.getAttribute(SessionValue.AVAILABLE_SCHEDULES);
 
     if (!optionalSchedules.isPresent()) {
-      session.setAttribute(SessionValue.NEXT_STEP, NextStep.FAREWELL);
-      return "Lo sentimos, no hay fechas disponibles";
+      session.setAttribute(SessionValue.NEXT_STEP, NextStep.USER_FOUND);
+      session.setAttribute(SessionValue.SHOW_INTRO, false);
+
+      return "Lo sentimos, no hay fechas disponibles.\n\n" + usersService.getMenuOptions(session);
     }
 
     String availableDates = "";
-    for (int i=0 ; i < optionalSchedules.get().size() ; i++) {
-      AvailableSchedule schedule = optionalSchedules.get().get(i);
-      availableDates += "\n" + (i + 1) + ". " + schedule.date() + " " + schedule.hour() + " (" + schedule.medicalprofessional().name() + " " + schedule.medicalprofessional().lastName() + ").";
+    int index = 0;
+    for ( ; index < optionalSchedules.get().size() ; index++) {
+      AvailableSchedule schedule = optionalSchedules.get().get(index);
+      availableDates += "\n" + (index + 1) + ". " + schedule.date() + " " + schedule.hour() + " (" + schedule.medicalprofessional().name() + " " + schedule.medicalprofessional().lastName() + ").";
     }
+
+    availableDates += "\n" + (index + 1) + ". Regresar.";
+
+    session.setAttribute(SessionValue.NEXT_STEP, NextStep.SELECT_DATE);
 
     return "Las fechas disponibles son:\n" + availableDates + "\n\nPor favor selecciona una opción";
   }
@@ -58,7 +68,15 @@ public class SchedulesService {
 
     Optional<List<AvailableSchedule>> optionalSchedules = (Optional<List<AvailableSchedule>>) session.getAttribute(SessionValue.AVAILABLE_SCHEDULES);
 
-    if (scheduleOption > 0 && scheduleOption <= optionalSchedules.get().size()) {
+    int returnOption = optionalSchedules.get().size() + 1;
+
+    if (scheduleOption == returnOption) {
+      // Si selecciona la última opción es porque desea regresar al menú de las opciones
+      session.setAttribute(SessionValue.NEXT_STEP, NextStep.USER_FOUND);
+      session.setAttribute(SessionValue.SHOW_INTRO, false);
+
+      return usersService.getMenuOptions(session);
+    } else if (scheduleOption > 0 && scheduleOption <= returnOption) {
       AvailableSchedule selectedSchedule = optionalSchedules.get().get(scheduleOption - 1);
 
       session.setAttribute(SessionValue.NEXT_STEP, NextStep.CONFIRM_APPOINTMENT);
@@ -71,7 +89,8 @@ public class SchedulesService {
   }
 
   public String setAppointment(Session session) {
-    session.setAttribute(SessionValue.NEXT_STEP, NextStep.FAREWELL);
+    session.setAttribute(SessionValue.NEXT_STEP, NextStep.USER_FOUND);
+    session.setAttribute(SessionValue.SHOW_INTRO, false);
 
     AvailableSchedule selectedSchedule = (AvailableSchedule) session.getAttribute(SessionValue.SELECTED_SCHEDULE);
     UserDTO user = (UserDTO) session.getAttribute(SessionValue.CURRENT_USER);
@@ -86,13 +105,18 @@ public class SchedulesService {
 
     boolean setAppointmentFinishedOk = (boolean) session.getAttribute(SessionValue.SET_APPOINTMENT_FINISHED_OK);
 
-    return setAppointmentFinishedOk ?
-        "Tu cita ha sido registrada para el " + selectedSchedule.date() + " a las " + selectedSchedule.hour() :
-        "Lo sentimos, se presentó un problema registrando tu cita. Por favor llamanos al 01-8000 123-456. Siempre es un placer servirte";
+    if (setAppointmentFinishedOk) {
+      return "Tu cita ha sido registrada para el " + selectedSchedule.date() + " a las " + selectedSchedule.hour()
+          + ".\n\n" + usersService.getMenuOptions(session);
+    } else {
+      return "Lo sentimos, se presentó un problema registrando tu cita. Por favor llamanos al 01-8000 123-456."
+          + "\n\n" + usersService.getMenuOptions(session);
+    }
   }
 
   public String getSchedulesByUser(String userId, Session session) {
-    session.setAttribute(SessionValue.NEXT_STEP, NextStep.FAREWELL);
+    session.setAttribute(SessionValue.NEXT_STEP, NextStep.USER_FOUND);
+    session.setAttribute(SessionValue.SHOW_INTRO, false);
 
     this.schedulesConsumer.getSchedulesByUser(userId, session);
 
@@ -105,15 +129,15 @@ public class SchedulesService {
     Optional<List<SchedulesByUser>> optionalSchedulesByUser = (Optional<List<SchedulesByUser>>) session.getAttribute(SessionValue.SCHEDULES_BY_USER);
 
     if (!optionalSchedulesByUser.isPresent()) {
-      return "Aún no tienes citas programadas";
+      return "Aún no tienes citas programadas.\n\n" + usersService.getMenuOptions(session);
     }
 
     String schedules = "";
-    for (int i=0 ; i < optionalSchedulesByUser.get().size() ; i++) {
-      SchedulesByUser schedule = optionalSchedulesByUser.get().get(i);
-      schedules += "\n" + (i + 1) + ". " + schedule.date() + " " + schedule.hour() + " (" + schedule.medicalprofessional().name() + " " + schedule.medicalprofessional().lastName() + ").";
+    for (int index=0 ; index < optionalSchedulesByUser.get().size() ; index++) {
+      SchedulesByUser schedule = optionalSchedulesByUser.get().get(index);
+      schedules += "\n" + (index + 1) + ". " + schedule.date() + " " + schedule.hour() + " (" + schedule.medicalprofessional().name() + " " + schedule.medicalprofessional().lastName() + ").";
     }
 
-    return "Tus citas programadas son:\n" + schedules;
+    return "Tus citas programadas son:\n" + schedules + "\n\n" + usersService.getMenuOptions(session);
   }
 }
