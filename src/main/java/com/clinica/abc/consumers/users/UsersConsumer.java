@@ -27,6 +27,7 @@ public class UsersConsumer {
     }
   }
 
+  // TODO mejorar
   private UserDTO getUserDTO(UserResponse userResponse) {
     return UserDTO.builder()
         .idUsuario(userResponse.getIdUsuario())

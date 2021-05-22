@@ -2,7 +2,6 @@ package com.clinica.abc.services;
 
 import com.clinica.abc.common.NextStep;
 import com.clinica.abc.common.SessionValue;
-import com.clinica.abc.consumers.users.UsersConsumer;
 import com.clinica.abc.model.UserDTO;
 import java.util.Optional;
 import org.apache.commons.lang3.EnumUtils;
@@ -14,16 +13,16 @@ public class ClinicaAbcBotService {
 
   private final SchedulesService schedulesService;
 
-  private final UsersConsumer usersConsumer;
-
   private final UsersService usersService;
 
+  private final AuthorizationsService authorizationsService;
+
   public ClinicaAbcBotService(SchedulesService schedulesService,
-      UsersConsumer usersConsumer,
-      UsersService usersService) {
+      UsersService usersService,
+      AuthorizationsService authorizationsService) {
     this.schedulesService = schedulesService;
-    this.usersConsumer = usersConsumer;
     this.usersService = usersService;
+    this.authorizationsService = authorizationsService;
   }
 
   public String processMessage(String message, Optional<Session> optionalSession) {
@@ -53,7 +52,7 @@ public class ClinicaAbcBotService {
         return "Bienvenido a la Clínica ABC, por favor digita tu número de identificación";
 
       case FIND_USER:
-        Optional<UserDTO> optionalUser = usersConsumer.getUser(message);
+        Optional<UserDTO> optionalUser = usersService.getUser(message);
 
         if (optionalUser.isPresent()) {
           session.setAttribute(SessionValue.NEXT_STEP, NextStep.USER_FOUND);
@@ -80,6 +79,8 @@ public class ClinicaAbcBotService {
           user = (UserDTO) session.getAttribute(SessionValue.CURRENT_USER);
           return schedulesService.getSchedulesByUser(String.valueOf(user.getNumeroId()), session);
         } else if (message.equals("3")) {
+          return processMessage(message, NextStep.TYPE_AUTHORIZATION, session);
+        } else if (message.equals("4")) {
           session.setAttribute(SessionValue.NEXT_STEP, NextStep.FAREWELL);
           return processMessage(message, NextStep.FAREWELL, session);
         } else {
@@ -96,6 +97,14 @@ public class ClinicaAbcBotService {
 
         session.setAttribute(SessionValue.NEXT_STEP, NextStep.DECISION);
         return processMessage("1", NextStep.DECISION, session);
+
+      case TYPE_AUTHORIZATION:
+        session.setAttribute(SessionValue.NEXT_STEP, NextStep.QUERY_FOR_AUTHORIZATION);
+        return "Digita el número de autorización";
+
+      case QUERY_FOR_AUTHORIZATION:
+        user = (UserDTO) session.getAttribute(SessionValue.CURRENT_USER);
+        return authorizationsService.queryForAuthorization(String.valueOf(user.getNumeroId()), message, session);
 
       case FAREWELL:
         session.stop();
