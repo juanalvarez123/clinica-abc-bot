@@ -22,6 +22,6 @@ public class AuthorizationDTO {
   private String doctor;
 
   public String getInformation() {
-    return "Autorización ID: " + authorizationId + ", Doctor: " + doctor;
+    return "Autorización ID: " + authorizationId + ", Doctor: " + doctor + ", Especialidad: " + description;
   }
 }
